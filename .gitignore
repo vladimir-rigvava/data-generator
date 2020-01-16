@@ -2,3 +2,4 @@
 testing.py
 *.csv
 *.ipynb
+*.gitignore
