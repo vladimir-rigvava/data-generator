@@ -1,16 +1,20 @@
 from numpy import random as r
-from numpy import array as array
+import numpy as np
 
 class DataGenerator():
-    def __init__(self, types, params, size=1):
+    def __init__(self, types, params, size=1000):
         self.funcs = types
         self.args = params
         self.size = size
     
     def count(self):
-        li = [] 
-        for i in range(len(self.funcs)):
-            li.append(eval( "self." + self.funcs[i] + "(*" + str(self.args[i]) + ")" )[0]) ###might rethink 0 index
+        #Цикл по 10000 строчек
+        #для каждого распределения создается массив
+        #превращаю массив в np.array
+        #конкатинирую
+        
+        arr = np.array([eval( "self." + self.funcs[i] + "(*" + str(self.args[i]) + ")" ) for i in range(len(self.funcs))])
+        li = arr.T.tolist()
         return li
 
     ### DISTRIBUTIONS ###
@@ -49,7 +53,7 @@ class DataGenerator():
         '''
         return r.geometric(p, self.size)
 
-    def hypergeometric(self, ngood, nbad, nall)
+    def hypergeometric(self, ngood, nbad, nall):
         '''Parameters:\n
         ngood: integer, >=0.\n
         nbad: integer, >=0.\n
@@ -136,7 +140,3 @@ class DataGenerator():
         a: float, >=0.
         '''
         return r.weibull(a, self.size)
-
-    
-
-    ###WIP###
