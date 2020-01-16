@@ -2,10 +2,10 @@ from numpy import random as r
 from numpy import array as array
 
 class DataGenerator():
-    def __init__(self, types, params):
+    def __init__(self, types, params, size=1):
         self.funcs = types
         self.args = params
-        self.size = 1
+        self.size = size
     
     def count(self):
         li = [] 
@@ -99,17 +99,6 @@ class DataGenerator():
         '''
         return r.negative_binomial(n, p, self.size)
 
-    def 
-
-    def triangular(self, left, top, right):
-        '''
-        Parameters:\n
-        left: float. \n
-        top: float, must be >= left.\n
-        right: float, must be >= top.
-        '''
-        return r.triangular(left, top, right, self.size)
-
     def normal(self, mean, std):
         '''
         Parameters:\n
@@ -124,7 +113,29 @@ class DataGenerator():
         '''
         return r.poisson(lam, self.size)
 
-    
+    def triangular(self, left, top, right):
+        '''
+        Parameters:\n
+        left: float. \n
+        top: float, must be >= left.\n
+        right: float, must be >= top.
+        '''
+        return r.triangular(left, top, right, self.size)
+
+    def uniform(self, left, right):
+        '''
+        Parameters:\n
+        left: float.\n
+        right: float, must be >left.
+        '''
+        return r.uniform(left, right, self.size)
+
+    def weibull(self, a):
+        '''
+        Parameters:\n
+        a: float, >=0.
+        '''
+        return r.weibull(a, self.size)
 
     
 
