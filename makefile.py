@@ -6,7 +6,7 @@ class FileManager:
     def __init__(self, filename):
         
         #DIRECTORY PATH HERE
-        self.path = os.path.dirname(os.path.abspath(__file__)) + "\\Tables\\"
+        self.path = os.path.dirname(os.path.abspath(__file__)).replace('\\', '/') + "/Tables/"
         self.filename = filename
 
         try:
@@ -33,7 +33,6 @@ class FileManager:
     def write_headers(self):
         self.writer.writerow(self.headers)
 
-    ### WIP
     def write(self):
         self.writer.writerows(self.DG.count())
 

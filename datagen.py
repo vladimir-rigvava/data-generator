@@ -1,5 +1,6 @@
 from numpy import random as r
 import numpy as np
+from sklearn.datasets import make_classification
 
 class DataGenerator():
     def __init__(self, types, params, size=1000):
@@ -12,10 +13,17 @@ class DataGenerator():
         #для каждого распределения создается массив
         #превращаю массив в np.array
         #конкатинирую
-        
-        arr = np.array([eval( "self." + self.funcs[i] + "(*" + str(self.args[i]) + ")" ) for i in range(len(self.funcs))])
-        li = arr.T.tolist()
-        return li
+        list_of_ML = ["classification", "regression"]
+        li = []
+        for i in range(len(self.funcs)):
+            if self.funcs[i] not in list_of_ML:
+                li.append(eval( "self." + self.funcs[i] + "(*" + str(self.args[i]) + ")" ))
+            else:
+                x, y = eval( "self." + self.funcs[i] + "(*" + str(self.args[i]) + ")" )
+                for values in x:
+                    li.append(values)
+                li.append(y)
+        return np.array(li).T.tolist()
 
     ### DISTRIBUTIONS ###
     def beta(self, a, b):
@@ -140,3 +148,24 @@ class DataGenerator():
         a: float, >=0.
         '''
         return r.weibull(a, self.size)
+
+    ### ML-like DATA
+    def classification(self, n_features, n_informative, n_redundant, n_classes, labels=0, weights=None, noise=0.01, complexity=1.0, intervals=None):
+        #n_classes * n_clusters_per_class must be smaller or equal 2 ** n_informative
+
+        #shift and scale from intervals
+        shift = []
+        scale = []
+        for interval in intervals:
+            shift.append((interval[1] + interval[0]) / (interval[1] - interval[0]))
+            scale.append((interval[1] - interval[0]) / 2)
+        
+        X, y = make_classification(n_samples=self.size, n_features=n_features, n_informative=n_informative, n_redundant=n_redundant,
+         n_classes=n_classes, n_clusters_per_class=1, weights=weights, flip_y=noise, class_sep=complexity, shift=shift, scale=scale, shuffle=False)
+        #naming labels if needed
+        if labels != 0:
+            for i in range(n_classes):
+                y[y == i] = label[i]
+
+        return X, y
+    #shuffle=False

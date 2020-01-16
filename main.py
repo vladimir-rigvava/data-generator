@@ -27,7 +27,7 @@ if __name__ == '__main__':
     #filename = takeinput.take_file_name()
 
     filename = "test"
-    rows = 20000000
+    rows = 10000000
     size = 10000
     headers = ["name1", "name2", "name3"]
     types = ["normal", "triangular", "beta"]
