@@ -1,5 +1,6 @@
 from numpy import random as r
 import numpy as np
+from faker import Faker
 from sklearn.datasets import make_classification, make_regression
 
 class DataGenerator():
@@ -7,6 +8,8 @@ class DataGenerator():
         self.funcs = types
         self.args = params
         self.size = size
+        self.ru = Faker('ru_RU')
+        self.en = Faker('en_US')
     
     def count(self):
         list_of_ML = ["classification", "regression"]
@@ -238,4 +241,60 @@ class DataGenerator():
 
         return X.T, y
 
-    #
+    #TEXT GENERATORS
+    def address_ru(self):
+        return [self.ru.address() for _ in range(self.size)]
+
+    def address_en(self):
+        return [self.en.address() for _ in range(self.size)]
+
+    def name_ru(self):
+        return [self.ru.name() for _ in range(self.size)]
+
+    def name_en(self):
+        return [self.en.name() for _ in range(self.size)]
+
+    def random_word(self, words):
+        '''words: list of strings'''
+        return [self.ru.random_element(words) for _ in range(self.size)]
+
+    def date(self, end_datetime=None):
+        return [self.ru.date(pattern="%d-%m-%Y", end_datetime=end_datetime) for _ in range(self.size)]
+
+    def time(self):
+        return [self.ru.time(pattern='%H:%M:%S') for _ in range(self.size)]
+
+    def location(self):
+        return [(float(self.ru.latlng()[0]), float(self.ru.latlng()[1])) for _ in range(self.size)]
+
+    def ip(self):
+        return [self.ru.ipv4() for _ in range(self.size)]
+
+    def isbn10(self):
+        return [self.ru.isbn10() for _ in range(self.size)]
+
+    def isbn13(self):
+        return [self.ru.isbn13() for _ in range(self.size)]
+
+    def password(self):
+        return [self.ru.password() for _ in range(self.size)]
+
+    def phone_number_ru(self):
+        return [self.ru.phone_number() for _ in range(self.size)]
+
+    def phone_number_en(self):
+        return [self.en.phone_number() for _ in range(self.size)]
+
+    def sentence_en(self, n_words):
+        return [self.en.sentence(n_words) for _ in range(self.size)]
+
+    def text_en(self, chars):
+        return [self.en.text(chars) for _ in range(self.size)]
+
+    def sentence_ru(self, n_words):
+        return [self.ru.sentence(n_words) for _ in range(self.size)]
+
+    def text_ru(self, chars):
+        return [self.ru.text(chars) for _ in range(self.size)]
+    
+
