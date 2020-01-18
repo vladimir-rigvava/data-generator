@@ -1,6 +1,6 @@
 from numpy import random as r
 import numpy as np
-from sklearn.datasets import make_classification
+from sklearn.datasets import make_classification, make_regression
 
 class DataGenerator():
     def __init__(self, types, params, size=1000):
@@ -9,10 +9,6 @@ class DataGenerator():
         self.size = size
     
     def count(self):
-        #Цикл по 10000 строчек
-        #для каждого распределения создается массив
-        #превращаю массив в np.array
-        #конкатинирую
         list_of_ML = ["classification", "regression"]
         li = []
         for i in range(len(self.funcs)):
@@ -150,22 +146,96 @@ class DataGenerator():
         return r.weibull(a, self.size)
 
     ### ML-like DATA
-    def classification(self, n_features, n_informative, n_redundant, n_classes, labels=0, weights=None, noise=0.01, complexity=1.0, intervals=None):
-        #n_classes * n_clusters_per_class must be smaller or equal 2 ** n_informative
-
-        #shift and scale from intervals
+    def classification(self, n_features, n_informative, n_redundant, n_classes, labels=0, weights=0, noise=0.01, complexity=1.0, intervals=0):
+        '''
+        n_classes * n_clusters_per_class must be smaller or equal 2 ** n_informative \n
+        n_inf + n_red <= n_features \n
+        labels: list of labels, length = n_classes \n
+        weights: list, proportion of classes, length = n_classes, sum=1 \n
+        noice: percent of wrong y's, must be >=0 and <1 \n
+        complexity: float >=0.5, default=1.0. Bigger number means easier solving \n
+        intervals: list of intervals of each feature
+        '''
+        #transforms intervals into shift and scale
         shift = []
         scale = []
-        for interval in intervals:
-            shift.append((interval[1] + interval[0]) / (interval[1] - interval[0]))
-            scale.append((interval[1] - interval[0]) / 2)
-        
+        if intervals != 0:
+            for interval in intervals:
+                shift.append((interval[1] + interval[0]) / (interval[1] - interval[0]))
+                scale.append((interval[1] - interval[0]) / 2)
+        else:
+            shift = 0
+            scale = 1
+
+        if weights == 0:
+            weights = None
+        else:
+            pass
+            
         X, y = make_classification(n_samples=self.size, n_features=n_features, n_informative=n_informative, n_redundant=n_redundant,
          n_classes=n_classes, n_clusters_per_class=1, weights=weights, flip_y=noise, class_sep=complexity, shift=shift, scale=scale, shuffle=False)
+        
         #naming labels if needed
         if labels != 0:
-            for i in range(n_classes):
-                y[y == i] = label[i]
+            y = np.array(np.array(y, dtype=np.int32), dtype=str)
+            for i in range(n_classes):                
+                y[y == str(i)] = labels[i]                
+                
+        #shuffle rows
+        a = np.concatenate((X, np.array([y]).T), axis=1)
+        r.shuffle(a)
+        if labels != 0:
+            X = np.array(a[:, :-1], dtype=np.float64)
+        else:
+            X = a[:, :-1]
+        y = a[:, -1]
 
-        return X, y
-    #shuffle=False
+        return X.T, y
+   
+    def regression(self, n_features, n_informative, noise, bias, n_outliers):
+        '''
+        # n_infomative must be <= n_features \n
+        # noise: float >=0. default: 0 \n
+        # bias: float >=. default: 0
+        '''
+        #Generates X, y for regression problem
+        X, y = make_regression(n_samples=self.size, n_features=n_features, n_informative=n_informative, noise=noise, bias=bias, shuffle=False)
+
+        #Makes outliers using spherical coordinates
+        X_distance_max = np.max(np.ptp(X)/2) #radius of n-dim sphere which includes all X data
+        X_distances = r.random(n_outliers) * X_distance_max * 1.5
+        alphas = r.random(n_outliers) * 2 * np.pi
+        betas = r.random((n_outliers, n_features-2)) * np.pi
+        angles = np.concatenate((np.array([alphas]).T, betas), axis=1)
+
+        #Trasforms spherical coordinates into Euclidian
+        li = []
+        length = angles.shape[1]
+        i = length
+        while i >= 0:
+            if i > 0:
+                coords *= np.prod(np.sin(angles[:,length-i:]), axis=1)
+            if i < length:
+                coords *= np.cos(angles[:,length-i-1])
+            i -= 1
+            li.append(coords)
+        X_outliers = np.array(li).T
+        
+        #Makes ouliers for y
+        y_distance = np.ptp(y)/2 
+        y_outliers = (y_distance + (y_distance * r.random(n_outliers) * 2)) * r.choice((-1, 1), n_outliers) + bias
+        
+        #Adds outliers into existing data
+        indices = r.choice(n_samples, n_outliers)
+        y[indices] = y_outliers
+        X[indices] = X_outliers
+
+        #shuffle rows
+        a = np.concatenate((X, np.array([y]).T), axis=1)
+        r.shuffle(a)
+        X = a[:, :-1]
+        y = a[:, -1]
+
+        return X.T, y
+
+    #
