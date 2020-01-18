@@ -27,10 +27,11 @@ if __name__ == '__main__':
     #filename = takeinput.take_file_name()
 
     filename = "test"
-    rows = 20000000
+    rows = 1000000
     size = 10000
-    headers = ["name1", "name2", "name3"]
-    types = ["normal", "triangular", "beta"]
-    params = [[0, 12], [5, 10, 15], [10, 20]]
+    headers = ["name1", "name2", "name3", "1", "2", "3", "4", "out"]
+    types = ["normal", "triangular", "beta", "classification"]
+    params = [[0, 12], [5, 10, 15], [10, 20], [4, 2, 1, 3, ["f", "s", "t"]]]
+
     
     mainf(filename, rows, headers, types, params, size)
